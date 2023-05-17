@@ -12,6 +12,10 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.2
+  http: ^0.13.6
+  provider: ^6.0.5
+  flutter_spinkit: ^5.2.0
+  animated_text_kit: ^4.2.2
 
 dev_dependencies:
   flutter_test:
@@ -20,7 +24,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # example:
+
+  assets:
+    - assets/images/
+
+
+
   # fonts:
   #   - family: Schyler
   #     fonts:
