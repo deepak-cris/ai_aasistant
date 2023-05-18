@@ -3,6 +3,8 @@ import 'package:ai_assistant/services/assetmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 
+import '../widgets/chat_widgets.dart';
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -50,9 +52,12 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: 8,
+                  itemCount: 6,
                   itemBuilder: (context, index) {
-                    return const Text('hi there');
+                    return ChatWidget(
+                        msg: chatMessages[index]['msg'].toString(),
+                        index: int.parse(
+                            chatMessages[index]['chatindex'].toString()));
                   },
                 ),
               ),
