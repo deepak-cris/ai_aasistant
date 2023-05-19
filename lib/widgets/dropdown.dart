@@ -1,4 +1,6 @@
+import 'package:ai_assistant/providers/modal_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/constants.dart';
 import '../modals/models_model.dart';
@@ -12,12 +14,15 @@ class CustomDropDown extends StatefulWidget {
 }
 
 class _CustomDropDownState extends State<CustomDropDown> {
-  String currentModel = 'gpt-3.5-turbo';
-
+  String? currentModel;
   @override
   Widget build(BuildContext context) {
+    // ignore: non_constant_identifier_names
+    final ModalsProvider = Provider.of<ModalProvider>(context, listen: false);
+
     return FutureBuilder<List<ModelsModel>>(
-      future: ApiServices.getModals(),
+      // future: ApiServices.getModals(),
+      future: ModalsProvider.getModelList,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return Center(child: Text(snapshot.error.toString()));
@@ -26,7 +31,7 @@ class _CustomDropDownState extends State<CustomDropDown> {
             ? const SizedBox.shrink()
             : FittedBox(
                 child: DropdownButton(
-                    value: currentModel,
+                    value: ModalsProvider.currentModel,
                     dropdownColor: cardColor,
                     items: List<DropdownMenuItem<String>>.generate(
                       snapshot.data!.length,
@@ -42,6 +47,7 @@ class _CustomDropDownState extends State<CustomDropDown> {
                       setState(() {
                         currentModel = value.toString();
                       });
+                      ModalsProvider.setCurrentModel(value.toString());
                     }),
               );
       },

@@ -2,8 +2,9 @@ import 'package:ai_assistant/constants/constants.dart';
 import 'package:ai_assistant/services/assetmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:ai_assistant/services/api_services.dart';
-
+import 'package:provider/provider.dart';
+import '../providers/modal_provider.dart';
+import '../services/api_services.dart';
 import '../widgets/chat_widgets.dart';
 import '../widgets/dropdown.dart';
 
@@ -29,8 +30,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   bool isTyping = true;
+  List<Map<String, Object>> messageList = [];
   @override
   Widget build(BuildContext context) {
+    // ignore: non_constant_identifier_names
+    final ModalsProvider = Provider.of<ModalProvider>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
           elevation: 2,
@@ -47,11 +51,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     builder: (BuildContext context) {
                       return Material(
                         color: cardColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
+                            children: [
                               Flexible(
                                 child: Text(
                                   'Select Model :',
@@ -112,7 +116,24 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                          onTap: () {},
+                          onTap: () async {
+                            try {
+                              Map<String, Object> temp = {
+                                'msg':
+                                    chattextEditingController!.value.toString(),
+                                'chatindex': 0
+                              };
+                              setState(() {
+                                messageList.add(temp);
+                              });
+
+                              await ApiServices.getChatResopnse(
+                                  ModalsProvider.currentModel,
+                                  chattextEditingController!.value.toString());
+                            } catch (e) {
+                              print(e);
+                            }
+                          },
                           child: const Icon(Icons.send, color: Colors.green)),
                     ],
                   ),

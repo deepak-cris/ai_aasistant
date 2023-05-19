@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:html';
 import 'dart:io';
 
 import 'package:ai_assistant/services/apiconstants.dart';
@@ -24,5 +25,36 @@ class ApiServices {
     } catch (e) {
       rethrow;
     }
+  }
+
+  Future<String> getChatResopnse(String model, String prompt) async {
+    final body = {
+      "model": model,
+      "prompt": prompt,
+      "max_tokens": 100,
+      "temperature": 0
+    };
+    try {
+      final response = await http.post(Uri.parse(BASEURICompletion),
+          body: jsonEncode(body),
+          headers: {
+            'Authorization': 'Bearer $KEY',
+            'Content-Type': 'application/json'
+          });
+      if (response.statusCode == 200) {
+        Map jsonResponse = jsonDecode(response.body);
+        print(jsonResponse.toString());
+        print(
+            '--------------------------------------------------------------------------------');
+        print(jsonResponse['choices'][0]['text'].toString());
+        print(
+            '--------------------------------------------------------------------------------');
+      } else {
+        throw HttpException(jsonDecode(response.body)['error']['message']);
+      }
+    } catch (e) {
+      rethrow;
+    }
+    return "ok";
   }
 }

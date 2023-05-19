@@ -1,2 +1,3 @@
 const String BASEURI = 'https://api.openai.com/v1/models';
-const String KEY = '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';
+const String BASEURICompletion = 'https://api.openai.com/v1/completions';
+const String KEY = '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';
