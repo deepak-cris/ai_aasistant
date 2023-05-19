@@ -2,8 +2,10 @@ import 'package:ai_assistant/constants/constants.dart';
 import 'package:ai_assistant/services/assetmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:ai_assistant/services/api_services.dart';
 
 import '../widgets/chat_widgets.dart';
+import '../widgets/dropdown.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -37,10 +39,35 @@ class _ChatScreenState extends State<ChatScreen> {
             child: Image.asset(AssetsManager.openaiImage),
           ),
           title: const Text('ChatGPT'),
-          actions: const [
+          actions: [
             IconButton(
-              onPressed: null,
-              icon: Icon(
+              onPressed: () {
+                showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Material(
+                        color: cardColor,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Flexible(
+                                child: Text(
+                                  'Select Model :',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Flexible(child: CustomDropDown()),
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+              },
+              icon: const Icon(
                 Icons.more_vert_rounded,
                 color: Colors.white,
               ),
@@ -84,7 +111,9 @@ class _ChatScreenState extends State<ChatScreen> {
                               hintStyle: TextStyle(color: Colors.grey)),
                         ),
                       ),
-                      const Icon(Icons.send, color: Colors.green),
+                      GestureDetector(
+                          onTap: () {},
+                          child: const Icon(Icons.send, color: Colors.green)),
                     ],
                   ),
                 ),
