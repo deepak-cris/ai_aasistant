@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:ai_assistant/modals/models_model.dart';
 
 class ModalProvider with ChangeNotifier {
-  String currentModel = 'gpt-3.5-turbo';
+  String currentModel = 'text-davinci-003';
   List<ModelsModel> modelList = [];
 
   void setCurrentModel(String currModel) {

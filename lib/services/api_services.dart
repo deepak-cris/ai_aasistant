@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:html';
 import 'dart:io';
-
 import 'package:ai_assistant/services/apiconstants.dart';
 import 'package:http/http.dart' as http;
 import 'package:ai_assistant/modals/models_model.dart';
+
+import '../modals/chat_model.dart';
 
 class ApiServices {
   static Future<List<ModelsModel>> getModals() async {
@@ -27,11 +27,12 @@ class ApiServices {
     }
   }
 
-  Future<String> getChatResopnse(String model, String prompt) async {
+  static Future<List<ChatModal>> getChatResopnse(
+      String model, String prompt) async {
     final body = {
       "model": model,
       "prompt": prompt,
-      "max_tokens": 100,
+      "max_tokens": 300,
       "temperature": 0
     };
     try {
@@ -41,20 +42,29 @@ class ApiServices {
             'Authorization': 'Bearer $KEY',
             'Content-Type': 'application/json'
           });
+
+      print('esponse.statusCode ');
+      print(response.statusCode);
       if (response.statusCode == 200) {
         Map jsonResponse = jsonDecode(response.body);
         print(jsonResponse.toString());
-        print(
-            '--------------------------------------------------------------------------------');
-        print(jsonResponse['choices'][0]['text'].toString());
-        print(
-            '--------------------------------------------------------------------------------');
+        List<ChatModal> aiChatList = [];
+        if (jsonResponse['choices'].length > 0) {
+          aiChatList = List.generate(
+              jsonResponse['choices'].length,
+              (index) => ChatModal(
+                  msg: jsonResponse['choices'][index]['text']
+                      .toString()
+                      .trimLeft(),
+                  chatInext: 1)).toList();
+        }
+
+        return aiChatList;
       } else {
         throw HttpException(jsonDecode(response.body)['error']['message']);
       }
     } catch (e) {
       rethrow;
     }
-    return "ok";
   }
 }

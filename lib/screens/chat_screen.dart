@@ -1,12 +1,15 @@
 import 'package:ai_assistant/constants/constants.dart';
+import 'package:ai_assistant/modals/chat_model.dart';
 import 'package:ai_assistant/services/assetmanager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:provider/provider.dart';
+import 'package:siri_wave/siri_wave.dart';
 import '../providers/modal_provider.dart';
 import '../services/api_services.dart';
 import '../widgets/chat_widgets.dart';
 import '../widgets/dropdown.dart';
+import '../widgets/siri_wave.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -15,24 +18,70 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>
+    with AutomaticKeepAliveClientMixin {
+  bool isTyping = false;
+  List<ChatModal> messageList = [];
   TextEditingController? chattextEditingController;
+  late FocusNode focusNode;
+  late ScrollController chatscrollController;
+  final siriWaveControler = SiriWaveController();
+
   @override
   void initState() {
     chattextEditingController = TextEditingController();
+    chatscrollController = ScrollController(keepScrollOffset: false);
+    //chatscrollController.keepScrollOffset;
+    focusNode = FocusNode();
     super.initState();
   }
 
   @override
   void dispose() {
     chattextEditingController!.dispose();
+    focusNode.dispose();
+    chatscrollController.dispose();
     super.dispose();
   }
 
-  bool isTyping = true;
-  List<Map<String, Object>> messageList = [];
+  void scrollListToBottom() {
+    chatscrollController.animateTo(
+      chatscrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void getApiResopnse(ModalProvider modalProvider) async {
+    try {
+      String txtmsg = chattextEditingController!.text;
+      chattextEditingController!.clear();
+      setState(() {
+        isTyping = true;
+        messageList.add(ChatModal(msg: txtmsg.toString(), chatInext: 0));
+
+        focusNode.unfocus();
+      });
+
+      List<ChatModal> tempobj = await ApiServices.getChatResopnse(
+          modalProvider.currentModel, txtmsg.toString());
+
+      setState(() {
+        messageList.addAll(tempobj);
+      });
+    } catch (e) {
+      print(e);
+    } finally {
+      setState(() {
+        isTyping = false;
+        scrollListToBottom();
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     // ignore: non_constant_identifier_names
     final ModalsProvider = Provider.of<ModalProvider>(context, listen: false);
     return Scaffold(
@@ -42,7 +91,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Image.asset(AssetsManager.openaiImage),
           ),
-          title: const Text('ChatGPT'),
+          title: const Text('AI Assistant'),
           actions: [
             IconButton(
               onPressed: () {
@@ -51,11 +100,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     builder: (BuildContext context) {
                       return Material(
                         color: cardColor,
-                        child: const Padding(
-                          padding: EdgeInsets.all(12.0),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
+                            children: const [
                               Flexible(
                                 child: Text(
                                   'Select Model :',
@@ -83,21 +132,33 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
-                  itemCount: 6,
+                  key: const Key('Chat_List'),
+                  controller: chatscrollController,
+                  itemCount: messageList.length,
                   itemBuilder: (context, index) {
                     return ChatWidget(
-                        msg: chatMessages[index]['msg'].toString(),
-                        index: int.parse(
-                            chatMessages[index]['chatindex'].toString()));
+                        key: UniqueKey(),
+                        msg: messageList[index].msg,
+                        index: messageList[index].chatInext);
                   },
                 ),
               ),
               if (isTyping) ...[
-                const SpinKitThreeBounce(
-                  color: Colors.white,
-                  size: 20,
-                )
+                // const SpinKitWave(
+                //   color: Colors.white,
+                //   size: 20,
+                // ),
+                //const Expanded(child: SiriWave()),
+                const SizedBox(
+                  height: 75,
+                  child: Expanded(
+                    child: SiriWaveWidget(),
+                  ),
+                ),
               ],
+              const SizedBox(
+                height: 10,
+              ),
               Material(
                 color: scafoldbackgroundcolor,
                 child: Padding(
@@ -106,7 +167,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     children: [
                       Expanded(
                         child: TextField(
-                          onSubmitted: (value) {},
+                          focusNode: focusNode,
+                          onSubmitted: (value) {
+                            getApiResopnse(ModalsProvider);
+                          },
                           controller: chattextEditingController,
                           style: const TextStyle(
                               color: Colors.white, fontSize: 15),
@@ -116,23 +180,8 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                          onTap: () async {
-                            try {
-                              Map<String, Object> temp = {
-                                'msg':
-                                    chattextEditingController!.value.toString(),
-                                'chatindex': 0
-                              };
-                              setState(() {
-                                messageList.add(temp);
-                              });
-
-                              await ApiServices.getChatResopnse(
-                                  ModalsProvider.currentModel,
-                                  chattextEditingController!.value.toString());
-                            } catch (e) {
-                              print(e);
-                            }
+                          onTap: () {
+                            getApiResopnse(ModalsProvider);
                           },
                           child: const Icon(Icons.send, color: Colors.green)),
                     ],
@@ -143,4 +192,8 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
         ));
   }
+
+  @override
+  // TODO: implement wantKeepAlive
+  bool get wantKeepAlive => true;
 }
