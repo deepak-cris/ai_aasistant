@@ -18,8 +18,7 @@ class ChatScreen extends StatefulWidget {
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
-class _ChatScreenState extends State<ChatScreen>
-    with AutomaticKeepAliveClientMixin {
+class _ChatScreenState extends State<ChatScreen> {
   bool isTyping = false;
   List<ChatModal> messageList = [];
   TextEditingController? chattextEditingController;
@@ -30,8 +29,7 @@ class _ChatScreenState extends State<ChatScreen>
   @override
   void initState() {
     chattextEditingController = TextEditingController();
-    chatscrollController = ScrollController(keepScrollOffset: false);
-    //chatscrollController.keepScrollOffset;
+    chatscrollController = ScrollController();
     focusNode = FocusNode();
     super.initState();
   }
@@ -52,6 +50,7 @@ class _ChatScreenState extends State<ChatScreen>
     );
   }
 
+  var messageIndexbuildCount = [];
   void getApiResopnse(ModalProvider modalProvider) async {
     try {
       String txtmsg = chattextEditingController!.text;
@@ -61,6 +60,7 @@ class _ChatScreenState extends State<ChatScreen>
         messageList.add(ChatModal(msg: txtmsg.toString(), chatInext: 0));
 
         focusNode.unfocus();
+        messageIndexbuildCount.add(0);
       });
 
       List<ChatModal> tempobj = await ApiServices.getChatResopnse(
@@ -68,6 +68,7 @@ class _ChatScreenState extends State<ChatScreen>
 
       setState(() {
         messageList.addAll(tempobj);
+        messageIndexbuildCount.add(0);
       });
     } catch (e) {
       print(e);
@@ -81,7 +82,7 @@ class _ChatScreenState extends State<ChatScreen>
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    // super.build(context);
     // ignore: non_constant_identifier_names
     final ModalsProvider = Provider.of<ModalProvider>(context, listen: false);
     return Scaffold(
@@ -132,28 +133,27 @@ class _ChatScreenState extends State<ChatScreen>
             children: [
               Expanded(
                 child: ListView.builder(
-                  key: const Key('Chat_List'),
+                  key: UniqueKey(),
                   controller: chatscrollController,
                   itemCount: messageList.length,
                   itemBuilder: (context, index) {
+                    messageIndexbuildCount[index] =
+                        messageIndexbuildCount[index] + 1;
                     return ChatWidget(
-                        key: UniqueKey(),
+                        key: Key('Key-$index'),
                         msg: messageList[index].msg,
-                        index: messageList[index].chatInext);
+                        index: messageList[index].chatInext,
+                        textAnimationFlag: index + 1 == messageList.length &&
+                                messageIndexbuildCount[index] == 1
+                            ? true
+                            : false);
                   },
                 ),
               ),
               if (isTyping) ...[
-                // const SpinKitWave(
-                //   color: Colors.white,
-                //   size: 20,
-                // ),
-                //const Expanded(child: SiriWave()),
                 const SizedBox(
                   height: 75,
-                  child: Expanded(
-                    child: SiriWaveWidget(),
-                  ),
+                  child: SiriWaveWidget(),
                 ),
               ],
               const SizedBox(
@@ -192,8 +192,4 @@ class _ChatScreenState extends State<ChatScreen>
           ),
         ));
   }
-
-  @override
-  // TODO: implement wantKeepAlive
-  bool get wantKeepAlive => true;
 }
