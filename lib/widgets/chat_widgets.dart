@@ -68,6 +68,9 @@ class ChatWidget extends StatelessWidget {
                                 animatedTexts: [TyperAnimatedText(msg)]),
                           ),
                         )
+                      /* Container(
+                          padding: const EdgeInsets.all(8),
+                          child: TextWidget(label: msg, fontsize: 16)) */
                       : Container(
                           padding: const EdgeInsets.all(8),
                           child: TextWidget(label: msg, fontsize: 16)),

@@ -101,11 +101,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     builder: (BuildContext context) {
                       return Material(
                         color: cardColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
+                        child: const Padding(
+                          padding: EdgeInsets.all(12.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: const [
+                            children: [
                               Flexible(
                                 child: Text(
                                   'Select Model :',
@@ -133,20 +133,23 @@ class _ChatScreenState extends State<ChatScreen> {
             children: [
               Expanded(
                 child: ListView.builder(
+                  reverse: true,
                   key: UniqueKey(),
                   controller: chatscrollController,
                   itemCount: messageList.length,
                   itemBuilder: (context, index) {
-                    messageIndexbuildCount[index] =
-                        messageIndexbuildCount[index] + 1;
+                    int reverseIndex = messageList.length - (index + 1);
+                    messageIndexbuildCount[reverseIndex] =
+                        messageIndexbuildCount[reverseIndex] + 1;
                     return ChatWidget(
-                        key: Key('Key-$index'),
-                        msg: messageList[index].msg,
-                        index: messageList[index].chatInext,
-                        textAnimationFlag: index + 1 == messageList.length &&
-                                messageIndexbuildCount[index] == 1
-                            ? true
-                            : false);
+                        key: Key('Key-$reverseIndex'),
+                        msg: messageList[reverseIndex].msg,
+                        index: messageList[reverseIndex].chatInext,
+                        textAnimationFlag:
+                            reverseIndex + 1 == messageList.length &&
+                                    messageIndexbuildCount[reverseIndex] == 1
+                                ? true
+                                : false);
                   },
                 ),
               ),
