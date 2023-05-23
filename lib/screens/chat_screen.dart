@@ -9,6 +9,7 @@ import '../providers/modal_provider.dart';
 import '../services/api_services.dart';
 import '../widgets/chat_widgets.dart';
 import '../widgets/dropdown.dart';
+import '../widgets/popup_menu.dart';
 import '../widgets/siri_wave.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -63,8 +64,8 @@ class _ChatScreenState extends State<ChatScreen> {
         messageIndexbuildCount.add(0);
       });
 
-      List<ChatModal> tempobj = await ApiServices.getChatResopnse(
-          modalProvider.currentModel, txtmsg.toString());
+      List<ChatModal> tempobj = await ApiServices()
+          .getChatResopnse(modalProvider.currentModel, txtmsg.toString());
 
       setState(() {
         messageList.addAll(tempobj);
@@ -94,6 +95,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           title: const Text('AI Assistant'),
           actions: [
+            const PopupMenu(),
             IconButton(
               onPressed: () {
                 showModalBottomSheet(
@@ -183,10 +185,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                       GestureDetector(
-                          onTap: () {
-                            getApiResopnse(ModalsProvider);
-                          },
-                          child: const Icon(Icons.send, color: Colors.green)),
+                        onTap: () {
+                          getApiResopnse(ModalsProvider);
+                        },
+                        child: const Icon(Icons.send, color: Colors.green),
+                      ),
                     ],
                   ),
                 ),

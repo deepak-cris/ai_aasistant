@@ -3,14 +3,15 @@ import 'dart:io';
 import 'package:ai_assistant/services/apiconstants.dart';
 import 'package:http/http.dart' as http;
 import 'package:ai_assistant/modals/models_model.dart';
-
+import '../providers/modal_provider.dart';
 import '../modals/chat_model.dart';
 
 class ApiServices {
-  static Future<List<ModelsModel>> getModals() async {
+  String apikey = ModalProvider().getApiKey;
+  Future<List<ModelsModel>> getModals() async {
     try {
-      final response = await http
-          .get(Uri.parse(BASEURI), headers: {'Authorization': 'Bearer $KEY'});
+      final response = await http.get(Uri.parse(BASEURI),
+          headers: {'Authorization': 'Bearer $apikey'});
       if (response.statusCode == 200) {
         Map jsonResponse = jsonDecode(response.body);
         print(jsonResponse.toString());
@@ -27,8 +28,7 @@ class ApiServices {
     }
   }
 
-  static Future<List<ChatModal>> getChatResopnse(
-      String model, String prompt) async {
+  Future<List<ChatModal>> getChatResopnse(String model, String prompt) async {
     final body = {
       "model": model,
       "prompt": prompt,
@@ -39,12 +39,13 @@ class ApiServices {
       final response = await http.post(Uri.parse(BASEURICompletion),
           body: jsonEncode(body),
           headers: {
-            'Authorization': 'Bearer $KEY',
+            'Authorization': 'Bearer $apikey',
             'Content-Type': 'application/json'
           });
 
       print('esponse.statusCode ');
       print(response.statusCode);
+      print('api key ------------------   $apikey');
       if (response.statusCode == 200) {
         Map jsonResponse = jsonDecode(response.body);
         print(jsonResponse.toString());
