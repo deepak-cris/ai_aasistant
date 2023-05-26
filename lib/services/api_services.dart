@@ -3,15 +3,19 @@ import 'dart:io';
 import 'package:ai_assistant/services/apiconstants.dart';
 import 'package:http/http.dart' as http;
 import 'package:ai_assistant/modals/models_model.dart';
-import '../providers/modal_provider.dart';
 import '../modals/chat_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiServices {
-  String apikey = ModalProvider().getApiKey;
   Future<List<ModelsModel>> getModals() async {
     try {
+      //final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+      final SharedPreferences _prefs = await SharedPreferences.getInstance();
+      String? apiKey = _prefs.getString('apiKey') ?? KEY;
+      print(
+          'API KEY--------------------------------------------------------------->$apiKey');
       final response = await http.get(Uri.parse(BASEURI),
-          headers: {'Authorization': 'Bearer $apikey'});
+          headers: {'Authorization': 'Bearer $apiKey'});
       if (response.statusCode == 200) {
         Map jsonResponse = jsonDecode(response.body);
         print(jsonResponse.toString());
@@ -36,16 +40,18 @@ class ApiServices {
       "temperature": 0
     };
     try {
+      final SharedPreferences _prefs = await SharedPreferences.getInstance();
+      String? apiKey = _prefs.getString('apiKey') ?? KEY;
       final response = await http.post(Uri.parse(BASEURICompletion),
           body: jsonEncode(body),
           headers: {
-            'Authorization': 'Bearer $apikey',
+            'Authorization': 'Bearer $apiKey',
             'Content-Type': 'application/json'
           });
-
-      print('esponse.statusCode ');
-      print(response.statusCode);
-      print('api key ------------------   $apikey');
+      print(
+          'API KEY--------------------------------------------------------------->$apiKey');
+      print(
+          'esponse.statusCode----------------------------------------------------> ${response.statusCode}');
       if (response.statusCode == 200) {
         Map jsonResponse = jsonDecode(response.body);
         print(jsonResponse.toString());
